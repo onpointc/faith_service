@@ -1,22 +1,25 @@
 {
-  "name": "Faith & Service Dev",
+  "name": "Faith & Service Dev (Codespaces)",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
-  "features": { "ghcr.io/devcontainers/features/git:1": {} },
-  "postCreateCommand": "corepack enable && pnpm i",
-  "forwardPorts": [3000, 8787, 5432],
-  "portsAttributes": {
-    "8787": { "label": "API" },
-    "3000": { "label": "Web" },
-    "5432": { "label": "Postgres" }
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/postgres:1": {
+      "version": "16",
+      "database": "faith_service",
+      "user": "postgres",
+      "password": "postgres"
+    }
   },
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "workspace",
+  "postCreateCommand": "corepack enable && corepack prepare pnpm@latest --activate && pnpm i",
+  "forwardPorts": [3000, 8787, 5432],
   "remoteUser": "node",
-  "updateContentCommand": "pnpm --filter @fse/api prisma:generate",
   "customizations": {
     "vscode": {
-      "settings": { "terminal.integrated.defaultProfile.windows": "pwsh" },
-      "extensions": ["esbenp.prettier-vscode", "prisma.prisma", "dbaeumer.vscode-eslint"]
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "prisma.prisma",
+        "dbaeumer.vscode-eslint"
+      ]
     }
   }
 }
