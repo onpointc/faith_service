@@ -1,0 +1,173 @@
+// prisma/schema.prisma
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+model School {
+  id        String   @id @default(uuid())
+  name      String
+  logoUrl   String?
+  description String?
+  motto     String?
+  brandHex  String? // blue/teal etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+  yearGroups YearGroup[]
+  houses    House[]
+  news      NewsPost[]
+  levels    AchievementLevelSetting[]
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  fullName   String
+  role       Role
+  schoolId   String
+  school     School   @relation(fields: [schoolId], references: [id])
+  yearGroup  YearGroup? @relation(fields: [yearGroupId], references: [id])
+  yearGroupId String?
+  house      House?   @relation(fields: [houseId], references: [id])
+  houseId    String?
+  student    Student?
+  teacher    Teacher?
+  createdAt  DateTime @default(now())
+}
+
+model Student {
+  id          String  @id @default(uuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id])
+  totalPoints Int     @default(0)
+  level       Level   @default(BRONZE)
+  submissions Submission[]
+  regs        ActivityRegistration[]
+  notes       PastoralNote[]
+}
+
+model Teacher {
+  id        String @id @default(uuid())
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id])
+  activities Activity[]
+  approvals  Submission[] @relation("SubmissionApprover")
+}
+
+enum Role { STUDENT TEACHER ADMIN }
+
+enum Level { BRONZE SILVER GOLD PLATINUM }
+
+model YearGroup {
+  id      String @id @default(uuid())
+  code    String @unique // Y7..Y12
+  school  School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  students User[]
+}
+
+model House {
+  id      String @id @default(uuid())
+  name    String
+  school  School @relation(fields: [schoolId], references: [id])
+  schoolId String
+  members User[]
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  date        DateTime
+  location    String?
+  points      Int
+  yearGroups  String[] // ["Y10","Y11"]
+  createdById String
+  createdBy   Teacher  @relation(fields: [createdById], references: [id])
+  regs        ActivityRegistration[]
+  submissions Submission[]
+  tags        String[] // Catholic values
+  createdAt   DateTime @default(now())
+}
+
+model ActivityRegistration {
+  id         String   @id @default(uuid())
+  activityId String
+  studentId  String
+  activity   Activity @relation(fields: [activityId], references: [id])
+  student    Student  @relation(fields: [studentId], references: [id])
+  status     RegStatus @default(REGISTERED)
+  createdAt  DateTime @default(now())
+}
+
+enum RegStatus { REGISTERED CANCELLED }
+
+model Submission {
+  id            String   @id @default(uuid())
+  activityId    String
+  studentId     String
+  activity      Activity @relation(fields: [activityId], references: [id])
+  student       Student  @relation(fields: [studentId], references: [id])
+  dateCompleted DateTime
+  minutesSpent  Int
+  reflection    String
+  proofUrl      String?
+  status        SubStatus @default(PENDING)
+  approverId    String?
+  approver      Teacher? @relation("SubmissionApprover", fields: [approverId], references: [id])
+  sentiment     Sentiment? @default(OK)
+  messages      SubmissionMessage[]
+  pointsAwarded Int       @default(0)
+  createdAt     DateTime @default(now())
+}
+
+enum SubStatus { PENDING APPROVED REJECTED }
+enum Sentiment { OK CHECK_IN CONCERN }
+
+model SubmissionMessage {
+  id           String   @id @default(uuid())
+  submissionId String
+  fromTeacher  Boolean
+  content      String
+  createdAt    DateTime @default(now())
+  submission   Submission @relation(fields: [submissionId], references: [id])
+}
+
+model AchievementLevelSetting {
+  id        String @id @default(uuid())
+  schoolId  String
+  school    School @relation(fields: [schoolId], references: [id])
+  level     Level
+  minPoints Int
+  UNIQUE    @@unique([schoolId, level])
+}
+
+model PointsTransaction {
+  id         String  @id @default(uuid())
+  studentId  String
+  student    Student @relation(fields: [studentId], references: [id])
+  amount     Int
+  reason     String
+  submissionId String?
+  createdAt  DateTime @default(now())
+}
+
+model PastoralNote {
+  id        String @id @default(uuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+  note      String
+  private   Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model NewsPost {
+  id        String @id @default(uuid())
+  schoolId  String
+  school    School @relation(fields: [schoolId], references: [id])
+  title     String
+  body      String
+  coverUrl  String?
+  tags      String[]
+  published Boolean @default(true)
+  createdAt DateTime @default(now())
+}

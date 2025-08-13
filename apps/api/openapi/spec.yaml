@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: Faith & Service API
+  version: 0.1.0
+servers:
+  - url: http://localhost:8787
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: ok
+  /activities:
+    get:
+      summary: List activities (filter by year group)
+    post:
+      summary: Create activity
+  /registrations:
+    post:
+      summary: Student registers for activity
+  /submissions:
+    get:
+      summary: List submissions (filters: status, teacher, year)
+    post:
+      summary: Log completion (date, minutes, reflection, proof)
+  /submissions/{id}/reply:
+    post:
+      summary: Teacher replies to student on a submission
+  /submissions/{id}/approve:
+    post:
+      summary: Approve or reject, award points
+  /reports/student/{id}/pdf:
+    get:
+      summary: Generate PDF achievement report
