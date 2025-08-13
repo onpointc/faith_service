@@ -1,0 +1,22 @@
+{
+  "name": "Faith & Service Dev",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "features": { "ghcr.io/devcontainers/features/git:1": {} },
+  "postCreateCommand": "corepack enable && pnpm i",
+  "forwardPorts": [3000, 8787, 5432],
+  "portsAttributes": {
+    "8787": { "label": "API" },
+    "3000": { "label": "Web" },
+    "5432": { "label": "Postgres" }
+  },
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "remoteUser": "node",
+  "updateContentCommand": "pnpm --filter @fse/api prisma:generate",
+  "customizations": {
+    "vscode": {
+      "settings": { "terminal.integrated.defaultProfile.windows": "pwsh" },
+      "extensions": ["esbenp.prettier-vscode", "prisma.prisma", "dbaeumer.vscode-eslint"]
+    }
+  }
+}
